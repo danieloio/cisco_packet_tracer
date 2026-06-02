@@ -427,3 +427,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+#Cisco Packet Tracer files
+*.bak
+*.pkt.bak
+*.tmp
+logs/
+*.log
