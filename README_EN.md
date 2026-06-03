@@ -1,28 +1,28 @@
-# 01 — Segmentación de Red con Inter-VLAN Routing
+# 01 — VLAN Segmentation with Inter-VLAN Routing
 
 ![Cisco](https://img.shields.io/badge/Cisco-Packet%20Tracer-blue?logo=cisco)
-![Level](https://img.shields.io/badge/Nivel-Intermedio-yellow)
+![Level](https://img.shields.io/badge/Level-Intermediate-yellow)
 ![VLANs](https://img.shields.io/badge/VLANs-4-green)
-![Status](https://img.shields.io/badge/Estado-Completado-brightgreen)
+![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
 
-Laboratorio de segmentación de red con 4 VLANs, inter-VLAN routing mediante router-on-a-stick, servidor DHCP dedicado, DHCP relay y port security. Diseñado para simular una infraestructura de red empresarial real.
-
----
-
-## Índice
-
-- [Topología](#topología)
-- [Dispositivos](#dispositivos)
-- [Direccionamiento IP](#direccionamiento-ip)
-- [Configuración](#configuración)
-- [Verificación](#verificación)
-- [Problemas encontrados](#problemas-encontrados)
+Network segmentation lab with 4 VLANs, inter-VLAN routing using router-on-a-stick, dedicated DHCP server, DHCP relay and port security. Designed to simulate a real enterprise network infrastructure.
 
 ---
 
-## Topología
+## Table of Contents
 
-![Topología](screenshots/01-topology.png)
+- [Topology](#topology)
+- [Devices](#devices)
+- [IP Addressing](#ip-addressing)
+- [Configuration](#configuration)
+- [Verification](#verification)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Topology
+
+![Topology](screenshots/01-topology.png)
 
 ```
                         R-EDGE-01 (ISR 4331)
@@ -47,35 +47,35 @@ Trunk links: SW-ACC-01 Gi1/0/24 → SW-CORE-01
 
 ---
 
-## Dispositivos
+## Devices
 
-| Dispositivo | Modelo | Función |
+| Device | Model | Role |
 |---|---|---|
 | R-EDGE-01 | Cisco ISR 4331 | Router-on-a-stick, DHCP relay |
-| SW-CORE-01 | Cisco 3650-24PS | Switch de core, enlaces trunk |
-| SW-ACC-01 | Cisco 3650-24PS | Switch de acceso, VLAN 10 y 20 |
-| SW-ACC-02 | Cisco 3650-24PS | Switch de acceso, VLAN 30 y 40 |
-| DHCP-SERVER | Server-PT | Servidor DHCP dedicado |
-| PC-ADMIN | PC-PT | Cliente VLAN 10 Administración |
-| PC-USER | PC-PT | Cliente VLAN 20 Usuarios |
-| PC-GUEST | PC-PT | Cliente VLAN 40 Invitados |
+| SW-CORE-01 | Cisco 3650-24PS | Core switch, trunk links |
+| SW-ACC-01 | Cisco 3650-24PS | Access switch, VLAN 10 & 20 |
+| SW-ACC-02 | Cisco 3650-24PS | Access switch, VLAN 30 & 40 |
+| DHCP-SERVER | Server-PT | Dedicated DHCP server |
+| PC-ADMIN | PC-PT | VLAN 10 Administration client |
+| PC-USER | PC-PT | VLAN 20 Users client |
+| PC-GUEST | PC-PT | VLAN 40 Guests client |
 
 ---
 
-## Direccionamiento IP
+## IP Addressing
 
-### VLANs y subredes
+### VLANs and subnets
 
-| VLAN | Nombre | Red | Gateway | Rango DHCP |
+| VLAN | Name | Network | Gateway | DHCP Range |
 |---|---|---|---|---|
 | 10 | Admin | 192.168.10.0/24 | 192.168.10.1 | .10 – .100 |
 | 20 | Users | 192.168.20.0/24 | 192.168.20.1 | .10 – .100 |
-| 30 | Servers | 192.168.30.0/24 | 192.168.30.1 | Estática |
+| 30 | Servers | 192.168.30.0/24 | 192.168.30.1 | Static only |
 | 40 | Guests | 192.168.40.0/24 | 192.168.40.1 | .10 – .50 |
 
-### IPs estáticas
+### Static IPs
 
-| Dispositivo | IP | VLAN |
+| Device | IP | VLAN |
 |---|---|---|
 | R-EDGE-01 Gi0/0/0.10 | 192.168.10.1 | 10 |
 | R-EDGE-01 Gi0/0/0.20 | 192.168.20.1 | 20 |
@@ -85,11 +85,11 @@ Trunk links: SW-ACC-01 Gi1/0/24 → SW-CORE-01
 
 ---
 
-## Configuración
+## Configuration
 
-### 1. VLANs en los switches
+### 1. VLANs on all switches
 
-Aplicado en SW-CORE-01, SW-ACC-01 y SW-ACC-02:
+Applied on SW-CORE-01, SW-ACC-01 and SW-ACC-02:
 
 ```cisco
 vlan 10
@@ -102,9 +102,9 @@ vlan 40
  name Guests
 ```
 
-### 2. Puertos access
+### 2. Access ports
 
-> En la versión de Packet Tracer utilizada, el 3650-24PS expone todos sus puertos como **GigabitEthernet1/0/X**. Los puertos de acceso y trunk se configuran en este rango.
+> In the Packet Tracer version used, the 3650-24PS exposes all ports as **GigabitEthernet1/0/X**. Both access and trunk ports are configured within this range.
 
 **SW-ACC-01:**
 ```cisco
@@ -132,9 +132,9 @@ interface GigabitEthernet1/0/2
  description DHCP-SERVER
 ```
 
-### 3. Enlaces trunk
+### 3. Trunk links
 
-El puerto **Gi1/0/24** se usa como uplink trunk en los switches de acceso hacia SW-CORE-01, aprovechando el puerto de mayor número para separar visualmente los uplinks de los puertos de acceso.
+Port **Gi1/0/24** is used as the trunk uplink on access switches toward SW-CORE-01, keeping uplinks visually separated from access ports.
 
 **SW-CORE-01:**
 ```cisco
@@ -154,7 +154,7 @@ interface GigabitEthernet1/0/3
  description TRUNK-R-EDGE-01
 ```
 
-**SW-ACC-01 y SW-ACC-02:**
+**SW-ACC-01 and SW-ACC-02:**
 ```cisco
 interface GigabitEthernet1/0/24
  switchport mode trunk
@@ -164,7 +164,7 @@ interface GigabitEthernet1/0/24
 
 ### 4. Router-on-a-stick (R-EDGE-01)
 
-La interfaz física no lleva IP. Cada subinterfaz actúa como gateway de su VLAN mediante encapsulación 802.1Q:
+The physical interface carries no IP address. Each subinterface acts as the default gateway for its VLAN using 802.1Q encapsulation:
 
 ```cisco
 interface GigabitEthernet0/0/0
@@ -194,7 +194,7 @@ interface GigabitEthernet0/0/0.40
 
 ### 5. DHCP Relay (ip helper-address)
 
-El broadcast DHCP no cruza VLANs de forma nativa. El comando `ip helper-address` redirige las solicitudes al servidor dedicado en VLAN 30. No se aplica en la subinterfaz .30 porque el servidor está en esa misma VLAN:
+DHCP broadcasts do not cross VLANs natively. The `ip helper-address` command forwards client requests to the dedicated server in VLAN 30. Not applied on subinterface .30 since the server resides in that same VLAN:
 
 ```cisco
 interface GigabitEthernet0/0/0.10
@@ -207,23 +207,23 @@ interface GigabitEthernet0/0/0.40
  ip helper-address 192.168.30.10
 ```
 
-### 6. Servidor DHCP
+### 6. DHCP Server
 
-Configurado mediante interfaz gráfica en Packet Tracer (Services → DHCP):
+Configured via GUI in Packet Tracer (Services → DHCP):
 
 ![DHCP Server Pools](screenshots/06-dhcp-server-pools.png)
 
-| Pool | Gateway | DNS | Start IP | Máx. usuarios |
+| Pool | Gateway | DNS | Start IP | Max users |
 |---|---|---|---|---|
 | VLAN10-Admin | 192.168.10.1 | 192.168.30.10 | 192.168.10.10 | 90 |
 | VLAN20-Users | 192.168.20.1 | 192.168.30.10 | 192.168.20.10 | 90 |
 | VLAN40-Guests | 192.168.40.1 | 192.168.30.10 | 192.168.40.10 | 40 |
 
-> La VLAN 30 no tiene pool DHCP. El servidor usa IP estática (192.168.30.10).
+> VLAN 30 has no DHCP pool. The server uses a static IP (192.168.30.10).
 
 ### 7. Port Security
 
-Aplicado en todos los puertos access de SW-ACC-01 y SW-ACC-02. Se usa modo `restrict` para registrar violaciones sin interrumpir el servicio:
+Applied on all access ports of SW-ACC-01 and SW-ACC-02. Mode `restrict` is used instead of `shutdown` to log violations without interrupting service:
 
 ![Port Security Config](screenshots/08-port-security-config.png)
 
@@ -245,54 +245,54 @@ interface GigabitEthernet1/0/2
 
 ---
 
-## Verificación
+## Verification
 
-### VLANs activas
+### Active VLANs
 
 ![show vlan brief](screenshots/03-show-vlan-brief.png)
 
-### Trunks activos
+### Active trunk links
 
 ![show interfaces trunk](screenshots/02-show-interfaces-trunk.png)
 
-### Subinterfaces del router
+### Router subinterfaces
 
 ![show ip interface brief](screenshots/07-router-ip-brief.png)
 
-### Ping inter-VLAN desde PC-ADMIN
+### Inter-VLAN ping from PC-ADMIN
 
-![Ping inter-VLAN](screenshots/04-ping-intervlan.png)
+![Inter-VLAN ping](screenshots/04-ping-intervlan.png)
 
-> El primer paquete perdido en cada ping es normal: corresponde a la resolución ARP inicial.
+> The first dropped packet in each ping is expected — it corresponds to the initial ARP resolution.
 
-### DHCP asignado a PC-GUEST
+### DHCP assigned to PC-GUEST
 
 ![DHCP PC-GUEST](screenshots/05-dhcp-pc-guest.png)
 
-### Resultados esperados
+### Expected results
 
-| Prueba | Resultado |
+| Test | Expected output |
 |---|---|
-| `show vlan brief` | VLANs 10, 20, 30, 40 activas |
-| `show interfaces trunk` | 802.1q trunking en Gi1/0/1, Gi1/0/2, Gi1/0/3 |
-| `show ip interface brief` | 4 subinterfaces up con sus IPs |
-| Ping inter-VLAN | Reply desde todas las VLANs |
-| DHCP PC-GUEST | 192.168.40.10 asignada correctamente |
+| `show vlan brief` | VLANs 10, 20, 30, 40 active |
+| `show interfaces trunk` | 802.1q trunking on Gi1/0/1, Gi1/0/2, Gi1/0/3 |
+| `show ip interface brief` | 4 subinterfaces up with correct IPs |
+| Inter-VLAN ping | Reply from all VLANs |
+| DHCP PC-GUEST | 192.168.40.10 correctly assigned |
 
 ---
 
-## Problemas encontrados
+## Troubleshooting
 
-**Problema:** Los PCs no recibían IP por DHCP.
-**Causa:** El `ip helper-address` no estaba configurado en las subinterfaces del router.
-**Solución:** Añadir `ip helper-address 192.168.30.10` en Gi0/0/0.10, .20 y .40.
-
----
-
-**Problema:** Confusión en la nomenclatura de interfaces del 3650-24PS.
-**Causa:** En la versión de Packet Tracer utilizada, todos los puertos del 3650-24PS se exponen como Gi1/0/X en lugar de separar puertos de acceso (Gi0/0/X) y uplinks (Gi1/0/X).
-**Solución:** Usar Gi1/0/1–Gi1/0/23 para acceso y Gi1/0/24 como uplink trunk hacia SW-CORE-01.
+**Issue:** PCs were not receiving an IP address via DHCP.
+**Root cause:** `ip helper-address` was missing on the router subinterfaces.
+**Fix:** Added `ip helper-address 192.168.30.10` on Gi0/0/0.10, .20 and .40.
 
 ---
 
-*Laboratorio realizado con Cisco Packet Tracer 8.x — Daniel Moisés Loyo Vásquez*
+**Issue:** Interface naming confusion on the 3650-24PS.
+**Root cause:** In the Packet Tracer version used, all 3650-24PS ports are exposed as Gi1/0/X instead of separating access ports (Gi0/0/X) from uplinks (Gi1/0/X).
+**Fix:** Used Gi1/0/1–Gi1/0/23 for access ports and Gi1/0/24 as the trunk uplink toward SW-CORE-01.
+
+---
+
+*Lab built with Cisco Packet Tracer 8.x — Daniel Moisés Loyo Vásquez*
