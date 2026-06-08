@@ -1,57 +1,57 @@
-# 03 — Servidor de Base de Datos con MariaDB y phpMyAdmin
+# 03 — Database Server with MariaDB and phpMyAdmin
 
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04_LTS-orange?logo=ubuntu)
 ![MariaDB](https://img.shields.io/badge/MariaDB-10.11-blue?logo=mariadb)
 ![Apache](https://img.shields.io/badge/Apache-2.4-red?logo=apache)
 ![phpMyAdmin](https://img.shields.io/badge/phpMyAdmin-5.2-6C78AF?logo=phpmyadmin)
-![Status](https://img.shields.io/badge/Estado-Completado-brightgreen)
+![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
 
-Despliegue de un servidor de base de datos empresarial sobre Ubuntu Server 22.04 en VirtualBox. El proyecto incluye la instalación y configuración de MariaDB, Apache y phpMyAdmin, el diseño de una base de datos relacional para la empresa multisede de los proyectos anteriores, consultas SQL con JOINs y un sistema de backup automatizado con cron.
-
----
-
-## Índice
-
-- [Infraestructura](#infraestructura)
-- [Servicios instalados](#servicios-instalados)
-- [Base de datos](#base-de-datos)
-- [Configuración](#configuración)
-- [Consultas SQL](#consultas-sql)
-- [Backup automatizado](#backup-automatizado)
-- [Problemas encontrados](#problemas-encontrados)
+Deployment of an enterprise database server on Ubuntu Server 22.04 in VirtualBox. The project covers the installation and configuration of MariaDB, Apache and phpMyAdmin, the design of a relational database for the multi-site company from the previous networking projects, SQL queries with JOINs, and an automated backup system using cron.
 
 ---
 
-## Infraestructura
+## Table of Contents
 
-| Parámetro | Valor |
+- [Infrastructure](#infrastructure)
+- [Installed services](#installed-services)
+- [Database](#database)
+- [Configuration](#configuration)
+- [SQL Queries](#sql-queries)
+- [Automated backup](#automated-backup)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Infrastructure
+
+| Parameter | Value |
 |---|---|
-| Hipervisor | Oracle VirtualBox |
-| Sistema operativo | Ubuntu Server 22.04 LTS |
+| Hypervisor | Oracle VirtualBox |
+| Operating system | Ubuntu Server 22.04 LTS |
 | RAM | 2048 MB |
-| Disco | 20 GB VDI |
-| Adaptador 1 | NAT (acceso a internet) |
-| Adaptador 2 | Host-Only — 192.168.56.10/24 (acceso SSH y phpMyAdmin) |
-| Acceso remoto | SSH desde Windows Terminal |
+| Disk | 20 GB VDI |
+| Adapter 1 | NAT (internet access) |
+| Adapter 2 | Host-Only — 192.168.56.10/24 (SSH and phpMyAdmin access) |
+| Remote access | SSH from Windows Terminal |
 
 ![IP interfaces](screenshots/01-ip-a.png)
 
 ---
 
-## Servicios instalados
+## Installed services
 
-| Servicio | Versión | Puerto |
+| Service | Version | Port |
 |---|---|---|
 | MariaDB | 10.11.14 | 3306 |
 | Apache | 2.4.58 | 80 |
 | PHP | 8.3.6 | — |
 | phpMyAdmin | 5.2.1 | 80 |
 
-### MariaDB activo
+### MariaDB running
 
 ![MariaDB status](screenshots/02-status-mariadb.png)
 
-### Apache activo
+### Apache running
 
 ![Apache status](screenshots/03-status-apache2.png)
 
@@ -59,17 +59,17 @@ Despliegue de un servidor de base de datos empresarial sobre Ubuntu Server 22.04
 
 ![phpMyAdmin login](screenshots/04-phpmyadmin-login.png)
 
-### phpMyAdmin — Panel principal
+### phpMyAdmin — Main panel
 
 ![phpMyAdmin panel](screenshots/05-phpmyadmin-panel.png)
 
 ---
 
-## Base de datos
+## Database
 
-La base de datos `empresa_multisede` modela la infraestructura de la empresa con 3 sedes (Madrid, Barcelona y Valencia) trabajada en los proyectos anteriores de redes.
+The `empresa_multisede` database models the infrastructure of the company with 3 sites (Madrid, Barcelona and Valencia) from the previous networking projects.
 
-### Diagrama de tablas
+### Table diagram
 
 ```
 sedes                    departamentos
@@ -107,19 +107,19 @@ telefono
           id_empleado (FK)
 ```
 
-### Estructura en phpMyAdmin
+### Database structure in phpMyAdmin
 
 ![DB structure](screenshots/06-db-structure.png)
 
-### Tabla empleados
+### Employees table
 
 ![DB empleados](screenshots/07-db-empleados.png)
 
 ---
 
-## Configuración
+## Configuration
 
-### 1. Red — interfaz Host-Only estática
+### 1. Network — static Host-Only interface
 
 ```yaml
 # /etc/netplan/50-cloud-init.yaml
@@ -138,7 +138,7 @@ network:
 sudo netplan apply
 ```
 
-### 2. Instalación de servicios
+### 2. Service installation
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -150,7 +150,7 @@ sudo a2enmod php8.3
 sudo systemctl restart apache2
 ```
 
-### 3. Seguridad de MariaDB
+### 3. MariaDB security
 
 ```bash
 sudo mysql_secure_installation
@@ -165,17 +165,17 @@ Remove test database:                 y
 Reload privilege tables:              y
 ```
 
-### 4. Usuario administrador
+### 4. Admin user
 
 ![Create dbadmin](screenshots/08-create-dbadmin.png)
 
 ```sql
-CREATE USER 'dbadmin'@'localhost' IDENTIFIED BY 'TuPassword';
+CREATE USER 'dbadmin'@'localhost' IDENTIFIED BY 'YourPassword';
 GRANT ALL PRIVILEGES ON *.* TO 'dbadmin'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 ```
 
-### 5. Creación de la base de datos
+### 5. Database creation
 
 ```sql
 CREATE DATABASE empresa_multisede CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -226,9 +226,9 @@ CREATE TABLE equipos (
 
 ---
 
-## Consultas SQL
+## SQL Queries
 
-### Consulta 1 — Empleados con sede y departamento (JOIN múltiple)
+### Query 1 — Employees with site and department (multiple JOIN)
 
 ```sql
 SELECT e.nombre, e.apellidos, e.cargo, s.ciudad, d.nombre AS departamento
@@ -237,11 +237,11 @@ JOIN sedes s ON e.id_sede = s.id_sede
 JOIN departamentos d ON e.id_departamento = d.id_departamento;
 ```
 
-![Consulta 1](screenshots/09-query-empleados-sede-dept.png)
+![Query 1](screenshots/09-query-empleados-sede-dept.png)
 
 ---
 
-### Consulta 2 — Salario medio por sede (GROUP BY + AVG)
+### Query 2 — Average salary per site (GROUP BY + AVG)
 
 ```sql
 SELECT s.ciudad, COUNT(e.id_empleado) AS total_empleados,
@@ -251,11 +251,11 @@ LEFT JOIN empleados e ON s.id_sede = e.id_sede
 GROUP BY s.ciudad;
 ```
 
-![Consulta 2](screenshots/10-query-salario-medio.png)
+![Query 2](screenshots/10-query-salario-medio.png)
 
 ---
 
-### Consulta 3 — Equipos asignados por empleado (LEFT JOIN)
+### Query 3 — Equipment assigned per employee (LEFT JOIN)
 
 ```sql
 SELECT e.nombre, e.apellidos, eq.tipo, eq.marca, eq.modelo, eq.estado
@@ -264,47 +264,47 @@ LEFT JOIN equipos eq ON e.id_empleado = eq.id_empleado
 ORDER BY e.nombre;
 ```
 
-![Consulta 3](screenshots/11-query-equipos-empleados.png)
+![Query 3](screenshots/11-query-equipos-empleados.png)
 
 ---
 
-## Backup automatizado
+## Automated backup
 
-### Script de backup comprimido
+### Compressed backup script
 
 ```bash
 #!/bin/bash
 DATE=$(date +%Y%m%d_%H%M%S)
-mysqldump -u dbadmin -pTuPassword empresa_multisede | gzip > ~/backups/backup_$DATE.sql.gz
-echo "Backup completado: backup_$DATE.sql.gz"
+mysqldump -u dbadmin -pYourPassword empresa_multisede | gzip > ~/backups/backup_$DATE.sql.gz
+echo "Backup completed: backup_$DATE.sql.gz"
 ```
 
-### Tarea cron — ejecución diaria a las 2:00 AM
+### Cron job — runs daily at 2:00 AM
 
 ```bash
 0 2 * * * /home/daniel/backup_db.sh
 ```
 
-### Restaurar un backup
+### Restore a backup
 
 ```bash
-gunzip < ~/backups/backup_FECHA.sql.gz | mysql -u dbadmin -p empresa_multisede
+gunzip < ~/backups/backup_DATE.sql.gz | mysql -u dbadmin -p empresa_multisede
 ```
 
 ---
 
-## Problemas encontrados
+## Troubleshooting
 
-**Problema:** La interfaz Host-Only (enp0s8) no levantaba al arrancar.
-**Causa:** No estaba configurada en netplan.
-**Solución:** Añadir enp0s8 con IP estática 192.168.56.10/24 en `/etc/netplan/50-cloud-init.yaml` y ejecutar `sudo netplan apply`.
-
----
-
-**Problema:** phpMyAdmin mostraba el código PHP en lugar de la interfaz web.
-**Causa:** El módulo PHP 8.3 no estaba habilitado en Apache.
-**Solución:** Instalar `libapache2-mod-php8.3`, habilitar con `a2enmod php8.3` y añadir `AddType application/x-httpd-php .php` en la configuración de phpMyAdmin.
+**Issue:** Host-Only interface (enp0s8) was not coming up on boot.
+**Root cause:** It was not configured in netplan.
+**Fix:** Added enp0s8 with static IP 192.168.56.10/24 in `/etc/netplan/50-cloud-init.yaml` and ran `sudo netplan apply`.
 
 ---
 
-*Laboratorio realizado con Ubuntu Server 22.04 LTS — Daniel Moisés Loyo Vásquez*
+**Issue:** phpMyAdmin was displaying raw PHP code instead of the web interface.
+**Root cause:** The PHP 8.3 module was not enabled in Apache.
+**Fix:** Installed `libapache2-mod-php8.3`, enabled it with `a2enmod php8.3` and added `AddType application/x-httpd-php .php` to the phpMyAdmin Apache configuration.
+
+---
+
+*Lab built on Ubuntu Server 22.04 LTS — Daniel Moisés Loyo Vásquez*
